@@ -1,0 +1,44 @@
+---
+- name: "checking Jenkins port"
+  wait_for: host={{ jenkins_host }} port=443 timeout={{jenkins_timeout}}
+  delegate_to: "{{ inventory_hostname }}"
+  tags: [ testing ]
+
+- name: "checking proxy port"
+  wait_for: host={{ server_name }} port={{listen_port}} timeout=5
+  delegate_to: "{{ inventory_hostname }}"
+  tags: [ testing ]
+
+# TODO: get the same output as we test through the proxy, which has to be a POST to /github-webook
+#- name: "check jenkins output"
+#  uri: url=https://{{ jenkins_host }}/github-webhook:443 return_content=yes status_code=200 timeout={{ jenkins_timeout }}
+#  async: "{{ jenkins_timeout }}"
+#  poll: "{{ poll_interval }}"
+#  retries: 10
+#  register: jenkins_webpage
+#  tags: [ testing ]
+
+#- fail: msg='jenkins is not happy'
+#  when: "'jenkins' not in jenkins_webpage.content"
+#  tags: [ testing ]
+
+# TODO: how to test the proxy is working? We only allow POSTS to /github-webhook
+#- name: "check proxy output"
+#  uri: url=https://{{ server_name }} return_content=yes status_code=200 timeout={{ proxy_timeout }}
+#  async: "{{ proxy_timeout }}"
+#  poll: "{{ poll_interval }}"
+#  retries: 10
+#  register: proxy_webpage
+#  tags: [ testing ]
+
+#- fail: msg='proxy is not happy'
+#  when: "'jenkins' not in proxy_webpage.content"
+#  tags: [ testing ]
+#
+#- fail: msg='proxy returned different page than Jenkins'
+#  when: "jenkins_webpage.content != proxy_webpage.content"
+#  tags: [ testing ]
+
+- name: "reload nginx"
+  notify:
+    - nginx reload
